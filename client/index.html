@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Save The Children</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+        }
+
+        header {
+            background-color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #000;
+        }
+
+        .logo img {
+            height: 40px;
+            border: 2px solid #000;
+            border-radius: 5px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 5px;
+            color: #000;
+            width: 200px;
+        }
+
+        .search-bar button {
+            padding: 10px 12px;
+            border: 2px solid #000;
+            border-radius: 5px;
+            background: #e63946;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #f1faee, #a8dadc);
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px;
+            border: 3px solid #000;
+        }
+
+        .hero h1 {
+            color: #1d3557;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        #eventsContainer {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .event {
+            background: white;
+            padding: 20px;
+            width: 320px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 2px solid #ccc;
+            text-align: center;
+        }
+
+        .event img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e63946;
+            cursor: pointer;
+        }
+
+        .event h2 {
+            font-size: 20px;
+            color: #e63946;
+            cursor: pointer;
+        }
+
+        .event p {
+            margin: 5px 0;
+        }
+
+        .event-buttons {
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 0 5px;
+        }
+
+        .update-btn {
+            background-color: #457b9d;
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: #e63946;
+            color: white;
+        }
+
+        .save-btn {
+            background-color: #2a9d8f;
+            color: white;
+        }
+
+        .cancel-btn {
+            background-color: #999;
+            color: white;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 6px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <img src="/images/stc-logo.png" alt="Save The Children">
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="txtID" placeholder="Search by ID, Name, Location">
+            <button onclick="redirectToResults()"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </div>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/events">My Events</a>
+        </nav>
+    </header>
+
+    <div class="hero">
+        <img src="/images/savethechildren2.png" alt="Save The Children">
+        <h1>Protect Children, Change Lives</h1>
+        <p>Join us to support education, health, and safety for children worldwide.</p>
+    </div>
+
+    <section id="upcoming-events">
+        <h2 style="text-align:center; color:#e63946;">Available & Upcoming Events</h2>
+        <div id="eventsContainer"></div>
+    </section>
+
+    <script>
+        function redirectToResults() {
+            const keyword = document.getElementById('txtID').value.trim();
+            if (!keyword) {
+                alert("Please enter a keyword to search for events");
+                return;
+            }
+            window.location.href = `search.html?keyword=${encodeURIComponent(keyword)}`;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => loadEvents());
+
+        function loadEvents() {
+            fetch("http://localhost:3060/api/events")
+                .then(res => res.json())
+                .then(events => {
+                    const container = document.getElementById('eventsContainer');
+                    container.innerHTML = "";
+
+                    events.forEach(event => {
+                        const div = document.createElement("div");
+                        div.classList.add("event");
+                        div.dataset.id = event.id;
+
+                        div.innerHTML = `
+                            <img src="http://localhost:3060${event.image}" alt="${event.name}" onclick="goToEvent(${event.id})">
+                            <h2 onclick="goToEvent(${event.id})">${event.name}</h2>
+                            <p><strong>Location:</strong> <span class="location">${event.location}</span></p>
+                            <p><strong>Date:</strong> <span class="date">${event.date}</span></p>
+                            <p><strong>Time:</strong> <span class="time">${event.time}</span></p>
+                            <p><strong>Description:</strong> <span class="description">${event.description}</span></p>
+                            <p><strong>Status:</strong> <span class="status-text">${event.status}</span></p>
+
+                            <div class="event-buttons">
+                                <button onclick="editEvent(${event.id})" class="btn update-btn">Update</button>
+                                <button onclick="deleteEvent(${event.id})" class="btn delete-btn">Delete</button>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                });
+        }
+
+        function goToEvent(id) {
+            window.location.href = `event-detail.html?id=${id}`;
+        }
+
+        function deleteEvent(id) {
+            if (confirm("Delete this event?")) {
+                fetch(`http://localhost:3060/api/events/${id}`, { method: "DELETE" })
+                    .then(res => res.ok && loadEvents());
+            }
+        }
+
+        function editEvent(id) {
+            const card = document.querySelector(`.event[data-id="${id}"]`);
+
+            const name = card.querySelector("h2").innerText;
+            const location = card.querySelector(".location").innerText;
+            const date = card.querySelector(".date").innerText;
+            const time = card.querySelector(".time").innerText;
+            const description = card.querySelector(".description").innerText;
+            const status = card.querySelector(".status-text").innerText;
+
+            card.innerHTML = `
+                <input type="text" id="name-${id}" value="${name}">
+                <input type="text" id="location-${id}" value="${location}">
+                <input type="date" id="date-${id}" value="${date}">
+                <input type="time" id="time-${id}" value="${time}">
+                <textarea id="description-${id}">${description}</textarea>
+                <select id="status-${id}">
+                    <option value="upcoming" ${status === "upcoming" ? "selected" : ""}>Upcoming</option>
+                    <option value="active" ${status === "active" ? "selected" : ""}>Active</option>
+                    <option value="past" ${status === "past" ? "selected" : ""}>Past</option>
+                </select>
+                <div class="event-buttons">
+                    <button onclick="saveEvent(${id})" class="btn save-btn">Save</button>
+                    <button onclick="loadEvents()" class="btn cancel-btn">Cancel</button>
+                </div>
+            `;
+        }
+
+        function saveEvent(id) {
+            const updatedEvent = {
+                name: document.getElementById(`name-${id}`).value,
+                location: document.getElementById(`location-${id}`).value,
+                date: document.getElementById(`date-${id}`).value,
+                time: document.getElementById(`time-${id}`).value,
+                description: document.getElementById(`description-${id}`).value,
+                status: document.getElementById(`status-${id}`).value
+            };
+
+            fetch(`http://localhost:3060/api/events/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedEvent)
+            })
+                .then(res => res.json())
+                .then(() => {
+                    alert("Event updated!");
+                    loadEvents();
+                });
+        }
+    </script>
+</body>
+
+</html>

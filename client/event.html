@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Event | Save the Children</title>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f8f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        
+        header {
+            background-color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #000;
+        }
+
+        .logo img {
+            height: 40px;
+            border: 2px solid #000;
+            border-radius: 5px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-bar input {
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 5px;
+            color: #000;
+            width: 200px;
+        }
+
+        .search-bar button {
+            padding: -5px;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* ✅ Hero-style heading */
+        .hero {
+            background: linear-gradient(135deg, #f1faee, #a8dadc);
+            padding: 30px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 20px;
+            border: 3px solid #000;
+        }
+
+        .hero h1 {
+            color: #1d3557;
+            font-size: 32px;
+            margin: 0;
+        }
+
+        /* ✅ Form */
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        form h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #e63946;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: 2px solid #000;
+            box-sizing: border-box;
+        }
+
+        button {
+            background: #1d3557;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #457b9d;
+        }
+    </style>
+</head>
+
+<body>
+
+
+   <header>
+    <div class="logo">
+        <a href="/">
+            <img src="/images/stc-logo.png" alt="Save The Children">
+        </a>
+    </div>
+    <nav>
+      ]
+
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/events">My Events</a>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>Register a New Event</h1>
+    </div>
+
+    <!--  Register Form -->
+    <form id="registerForm">
+        <h2>Event Registration</h2>
+
+        <label for="name">Event Name</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="location">Location</label>
+        <input type="text" id="location" name="location" required>
+
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date" required>
+
+        <label for="time">Time</label>
+        <input type="time" id="time" name="time" required>
+
+        <label for="ticket_price">Ticket Price ($)</label>
+        <input type="number" id="ticket_price" name="ticket_price" step="0.01" required>
+
+        <label for="goal_amount">Goal Amount ($)</label>
+        <input type="number" id="goal_amount" name="goal_amount" step="0.01" required>
+
+        <label for="progress_amount">Progress Amount ($)</label>
+        <input type="number" id="progress_amount" name="progress_amount" step="0.01" required>
+
+        <button type="submit">Register Event</button>
+    </form>
+
+    <script>
+        function redirectToResults() {
+            const eventId = document.getElementById("txtID").value.trim();
+            if (eventId) {
+                window.location.href = `/events/${eventId}`;
+            } else {
+                alert("Please enter an Event ID to search.");
+            }
+        }
+
+        document.getElementById("registerForm").addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById("name").value,
+                location: document.getElementById("location").value,
+                date: document.getElementById("date").value,
+                time: document.getElementById("time").value,
+                ticket_price: document.getElementById("ticket_price").value,
+                goal_amount: document.getElementById("goal_amount").value,
+                progress_amount: document.getElementById("progress_amount").value
+            };
+
+            console.log("Event Data:", formData);
+            alert("Event registered successfully!");
+            e.target.reset();
+        });
+    </script>
+
+</body>
+
+</html>

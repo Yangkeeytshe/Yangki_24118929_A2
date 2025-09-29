@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f8f8;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #000;
+        }
+
+        .logo img {
+            height: 40px;
+            border: 2px solid #000;
+            border-radius: 5px;
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #000;
+            font-size: 16px;
+        }
+
+        nav a:hover {
+            color: #e63946;
+        }
+
+        h1 {
+            text-align: center;
+            color: #e63946;
+            margin: 20px 0;
+        }
+
+        #results {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .event {
+            background: white;
+            padding: 20px;
+            width: 300px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border: 2px solid #ccc;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
+
+        .event:hover {
+            transform: scale(1.03);
+        }
+
+        .event img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e63946;
+            cursor: pointer;
+        }
+
+        .event h2 {
+            font-size: 20px;
+            color: #e63946;
+            cursor: pointer;
+        }
+
+        footer {
+            background-color: #1d3557;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="/images/stc-logo.png" alt="Save The Children">
+        </div>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/events">My Events</a>
+        </nav>
+    </header>
+
+    <h1>Search Results</h1>
+    <div id="results"></div>
+
+    <footer>
+        <p>&copy; 2025 Save The Children. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const params = new URLSearchParams(window.location.search);
+            const keyword = params.get("keyword");
+            const resultsContainer = document.getElementById("results");
+
+            if (!keyword) {
+                resultsContainer.innerHTML = "<p>Please enter a keyword to search for events.</p>";
+                return;
+            }
+
+            fetch(`/api/events?keyword=${encodeURIComponent(keyword)}`)
+                .then(response => response.json())
+                .then(events => {
+                    if (events.length === 0) {
+                        resultsContainer.innerHTML = `<p>No events found for: <strong>${keyword}</strong></p>`;
+                        return;
+                    }
+                    resultsContainer.innerHTML = events.map(event => `
+                <div class="event">
+    <img src="${event.image}" alt="${event.name} Image">
+    <h3>${event.name}</h3>
+    <p><strong>ID:</strong> ${event.id}</p>
+    <p><strong>Location:</strong> ${event.location}</p>
+    <p><strong>Date:</strong> ${event.date}</p>
+</div>
+
+                </div>
+            `).join("");
+                })
+                .catch(err => {
+                    console.error(err);
+                    resultsContainer.innerHTML = "<p>Error loading events.</p>";
+                });
+        });
+    </script>
+
+</body>
+
+</html>
