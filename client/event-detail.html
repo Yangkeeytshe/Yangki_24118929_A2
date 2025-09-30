@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Details | Save the Children</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f8f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #000;
+        }
+
+        nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: #e63946;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        .progress-container {
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 20px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #2a9d8f;
+            text-align: center;
+            color: white;
+            line-height: 20px;
+        }
+
+        .alert {
+            background: #ffdddd;
+            padding: 10px;
+            color: red;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div><strong>Save the Children</strong></div>
+        <nav>
+            <a href="index.html"><i class="fa fa-home"></i> Home</a>
+            <a href="events.html"><i class="fa fa-file-text"></i> Events</a>
+        </nav>
+    </header>
+
+    <main class="container" id="event-details-container">
+        <div id="error" class="alert" style="display:none;"></div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const container = document.getElementById("event-details-container");
+            const errorDiv = document.getElementById("error");
+
+            const params = new URLSearchParams(window.location.search);
+            const eventId = params.get("id");
+
+            if (!eventId) {
+                errorDiv.textContent = "No event selected.";
+                errorDiv.style.display = "block";
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:3060/api/events/${eventId}`);
+                const event = await response.json();
+                console.log(event); // Debug
+
+                if (event.error) {
+                    errorDiv.textContent = event.error;
+                    errorDiv.style.display = "block";
+                    return;
+                }
+
+                container.innerHTML = `
+                    <h1>${event.name}</h1>
+                    <p><strong>ID:</strong> ${event.id}</p>
+                    <p><strong>Name:</strong> ${event.name}</p>
+                    <p><strong>Location:</strong> ${event.location}</p>
+                    <p><strong>Date:</strong> ${event.date}</p>
+                    <p><strong>Time:</strong> ${event.time}</p>
+                    <p><strong>Description:</strong> ${event.description}</p>
+                    <p><strong>Status:</strong> ${event.status}</p>
+                    <p><strong>Ticket Price:</strong> $${parseFloat(event.ticket_price).toFixed(2)}</p>
+                    <p><strong>Goal Amount:</strong> $${parseFloat(event.goal_amount).toFixed(2)}</p>
+                    <p><strong>Progress Amount:</strong> $${parseFloat(event.progress_amount).toFixed(2)}</p>
+                    <p><strong>Progress Percentage:</strong> ${parseFloat(event.progress_percentage).toFixed(2)}%</p>
+
+                    <div><strong>Progress:</strong></div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width:${parseFloat(event.progress_percentage)}%">
+                            ${parseFloat(event.progress_percentage).toFixed(2)}%
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                console.error(err);
+                errorDiv.textContent = "Error loading event details.";
+                errorDiv.style.display = "block";
+            }
+        });
+    </script>
+</body>
+
+</html>

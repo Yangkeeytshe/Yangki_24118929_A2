@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Event | Save the Children</title>
+    <title>Register | Save the Children</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
@@ -13,7 +12,6 @@
             margin: 0;
             padding: 0;
         }
-
 
         header {
             background-color: white;
@@ -26,29 +24,6 @@
 
         .logo img {
             height: 40px;
-            border: 2px solid #000;
-            border-radius: 5px;
-        }
-
-        .search-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .search-bar input {
-            padding: 10px;
-            border: 2px solid #000;
-            border-radius: 5px;
-            color: #000;
-            width: 200px;
-        }
-
-        .search-bar button {
-            padding: -5px;
-            color: white;
-            cursor: pointer;
-            font-size: 15px;
         }
 
         nav a {
@@ -59,17 +34,15 @@
         }
 
         .hero {
-            background: linear-gradient(135deg, #f1faee, #a92e2e63);
+            background: linear-gradient(135deg, #f1faee, #a8dadc);
             padding: 30px;
             text-align: center;
-            border-radius: 8px;
             margin: 20px;
-            border: 3px solid #000;
+            border-radius: 8px;
         }
 
         .hero h1 {
             color: #1d3557;
-            font-size: 32px;
             margin: 0;
         }
 
@@ -79,32 +52,11 @@
             background: white;
             padding: 20px;
             border-radius: 8px;
-            border: 3px solid red;
-            /* changed outline to red */
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-        }
-
-        button {
-            background: rgb(30, 3, 3);
-            /* red button */
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-        }
-
-        button:hover {
-            background: darkred;
-            /* darker red on hover */
+            border: 3px solid #e63946;
         }
 
         form h2 {
             text-align: center;
-            margin-bottom: 15px;
             color: #e63946;
         }
 
@@ -114,142 +66,209 @@
             font-weight: bold;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 10px;
             margin-top: 5px;
             border-radius: 5px;
-            border: 2px solid #b42424;
+            border: 2px solid #ccc;
             box-sizing: border-box;
+        }
+
+        input:read-only {
+            background: #f0f0f0;
+            cursor: not-allowed;
+        }
+
+        #eventDetails {
+            background: #f1faee;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        button {
+            background: #e63946;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #d62839;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+            display: none;
+        }
+
+        .error {
+            background: #ffdddd;
+            color: #d8000c;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+            display: none;
         }
     </style>
 </head>
-
 <body>
-
 
     <header>
         <div class="logo">
-            <a href="/">
-                <img src="/images/stc-logo.png" alt="Save The Children">
-            </a>
+            <img src="/images/stc-logo.png" alt="Logo">
         </div>
         <nav>
-
-
-            <nav>
-                <a href="/"><i class='fa fa-home'></i>Home</a>
-                <a href="/events"><i class='fa fa-file-text'></i> Events</a>
-            </nav>
+            <a href="/"><i class='fa fa-home'></i> Home</a>
+            <a href="/events"><i class='fa fa-file-text'></i> Events</a>
+        </nav>
     </header>
 
-    <!-- Hero Section -->
     <div class="hero">
-        <h1>Register a New Event</h1>
+        <h1>Register for an Event</h1>
     </div>
+
+    <div id="success" class="success"></div>
+    <div id="error" class="error"></div>
+
     <form id="registerForm">
         <h2>Event Registration</h2>
 
-        <label for="eventSelect">Choose Event</label>
-        <select id="eventSelect" name="event_id" required></select>
-
-        <label for="eventDateSelect">Choose Event Date</label>
-        <select id="eventDateSelect" name="event_date" required></select>
-
-        <label for="eventTicket_price">Ticket Price ($)</label>
-        <input type="number" id="eventTicketPrice" name="event_ticket_price" step="0.01" readonly>
-
+        <label for="eventSelect">Select Event *</label>
+        <select id="eventSelect" required>
+            <option value="">-- Choose an Event --</option>
+        </select>
 
         <div id="eventDetails"></div>
 
-        <label for="name">Your Name</label>
-        <input type="text" id="name" name="name" required>
+        <label for="name">Your Name *</label>
+        <input type="text" id="name" required>
 
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
+        <label for="email">Email *</label>
+        <input type="email" id="email" required>
 
         <label for="donation">Donation Amount ($)</label>
-        <input type="number" id="donation" name="donation" step="0.01">
+        <input type="number" id="donation" step="0.01" min="0" placeholder="Optional">
 
-
-        <button type="submit">Register</button>
+        <button type="submit">Register Now</button>
     </form>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    fetch("http://localhost:3060/api/events")
-        .then(res => res.json())
-        .then(events => {
-            const eventSelect = document.getElementById("eventSelect");
-            const eventDateSelect = document.getElementById("eventDateSelect");
-            const ticketPriceInput = document.getElementById("eventTicketPrice");
 
-            const eventsMap = {};
+    <script>
+        let eventsMap = {};
+        let selectedEventId = null;
 
-            events.forEach(event => {
-                const option = document.createElement("option");
-                option.value = event.id;
-                option.text = event.name;
-                option.dataset.date = event.date;
-                option.dataset.time = event.time;
-                option.dataset.location = event.location;
-                option.dataset.ticket_price = event.ticket_price;
-                
+        // Load events
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("http://localhost:3060/api/events")
+                .then(res => res.json())
+                .then(events => {
+                    const select = document.getElementById("eventSelect");
+                    
+                    events.forEach(event => {
+                        const option = document.createElement("option");
+                        option.value = event.id;
+                        option.textContent = event.name;
+                        eventsMap[event.id] = event;
+                        select.appendChild(option);
+                    });
 
-                eventSelect.appendChild(option);
-                eventsMap[event.id] = event;
-            });
+                    // Show event details when selected
+                    select.addEventListener("change", function() {
+                        if (this.value) {
+                            selectedEventId = this.value;
+                            showEventDetails(eventsMap[this.value]);
+                            // Make readonly after selection
+                            this.setAttribute('readonly', true);
+                            this.style.pointerEvents = 'none';
+                            this.style.background = '#f0f0f0';
+                        }
+                    });
+                })
+                .catch(() => showError("Failed to load events"));
+        });
 
-            updateEventDetails(events[0]);
+        // Show event details - DOM manipulation
+        function showEventDetails(event) {
+            const details = document.getElementById("eventDetails");
+            details.innerHTML = `
+                <h3 style="color: #e63946; margin-top: 0;">${event.name}</h3>
+                <p><strong>Location:</strong> ${event.location || 'TBA'}</p>
+                <p><strong>Description:</strong> ${event.description || 'N/A'}</p>
+                <p><strong>Ticket Price:</strong> $${parseFloat(event.ticket_price || 0).toFixed(2)}</p>
+            `;
+            details.style.display = 'block';
+        }
 
-            eventSelect.addEventListener("change", function () {
-                const selectedEvent = eventsMap[this.value];
-                updateEventDetails(selectedEvent);
-            });
+        // Show success message - DOM manipulation
+        function showSuccess(msg) {
+            const success = document.getElementById("success");
+            success.textContent = msg;
+            success.style.display = "block";
+            document.getElementById("error").style.display = "none";
+            setTimeout(() => success.style.display = "none", 5000);
+        }
 
-            function updateEventDetails(event) {
-                eventDateSelect.innerHTML = "";
-                const dateOption = document.createElement("option");
-                dateOption.value = event.date;
-                dateOption.text = event.date + " (" + event.time + ")";
-                eventDateSelect.appendChild(dateOption);
-                
+        // Show error message - DOM manipulation
+        function showError(msg) {
+            const error = document.getElementById("error");
+            error.textContent = msg;
+            error.style.display = "block";
+            document.getElementById("success").style.display = "none";
+            setTimeout(() => error.style.display = "none", 5000);
+        }
 
-                ticketPriceInput.value = parseFloat(event.ticket_price).toFixed(2);
+        // Handle form submission
+        document.getElementById("registerForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            if (!selectedEventId) {
+                showError("Please select an event");
+                return;
             }
+
+            const data = {
+                name: document.getElementById("name").value,
+                email: document.getElementById("email").value,
+                event_id: selectedEventId,
+                donation: document.getElementById("donation").value || 0
+            };
+
+            fetch("http://localhost:3060/api/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(response => {
+                showSuccess(response.message || "Registration successful!");
+                // Reset form
+                document.getElementById("registerForm").reset();
+                document.getElementById("eventDetails").style.display = "none";
+                // Re-enable event select
+                const select = document.getElementById("eventSelect");
+                select.removeAttribute('readonly');
+                select.style.pointerEvents = 'auto';
+                select.style.background = 'white';
+                selectedEventId = null;
+            })
+            .catch(() => showError("Registration failed. Please try again."));
         });
-
-    // Form submit
-    document.getElementById("registerForm").addEventListener("submit", function (e) {
-        e.preventDefault();
-
-        const data = {
-            name: document.getElementById("name").value,
-            email: document.getElementById("email").value,
-            event_id: document.getElementById("eventSelect").value,
-            event_date: document.getElementById("eventDateSelect").value,
-            ticket_price: document.getElementById("eventTicketPrice").value,
-            
-            donation: document.getElementById("donation").value
-        };
-
-        fetch("http://localhost:3060/api/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(data)
-        })
-        .then(res => res.json())
-        .then(response => {
-            alert(response.message);
-            document.getElementById("registerForm").reset();
-        })
-        .catch(err => {
-            console.error("Error:", err);
-            alert("Error registering event");
-        });
-    });
-});
-</script>
+    </script>
 
 </body>
-
 </html>

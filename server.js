@@ -33,6 +33,10 @@ app.get("/register", (req, res) => {
 app.get("/search", (req, res) => {
     res.sendFile(path.join(__dirname, "client", "search.html"));
 });
+app.get("/event-detail", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "event-detail.html"));
+});
+
 
 
 // API routes

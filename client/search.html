@@ -1,19 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Results</title>
+    <title>Search | Save The Children</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 0;
             background-color: #f8f8f8;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
         }
 
         header {
@@ -27,8 +23,6 @@
 
         .logo img {
             height: 40px;
-            border: 2px solid #000;
-            border-radius: 5px;
         }
 
         nav a {
@@ -36,17 +30,36 @@
             text-decoration: none;
             font-weight: bold;
             color: #000;
-            font-size: 16px;
         }
 
-        nav a:hover {
-            color: #e63946;
+        .search-bar {
+            display: flex;
+            gap: 8px;
         }
+
+        .search-bar input {
+            padding: 10px;
+            border: 2px solid #000;
+            border-radius: 5px;
+            width: 200px;
+        }
+
+        .search-bar button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-search { background: #e63946; }
+        .btn-clear { background: #999; }
 
         h1 {
             text-align: center;
             color: #e63946;
-            margin: 20px 0;
+            margin: 20px;
         }
 
         #results {
@@ -55,106 +68,112 @@
             justify-content: center;
             gap: 20px;
             padding: 20px;
-            flex: 1;
         }
 
         .event {
             background: white;
             padding: 20px;
             width: 300px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             text-align: center;
-            transition: transform 0.2s ease;
-        }
-
-        .event:hover {
-            transform: scale(1.03);
         }
 
         .event img {
             width: 100%;
             height: 180px;
             object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border: 2px solid #e63946;
+            border-radius: 8px;
             cursor: pointer;
         }
 
-        .event h2 {
-            font-size: 20px;
+        .event h3 {
             color: #e63946;
             cursor: pointer;
         }
-
-        footer {
-            background-color: #1d3557;
-            color: white;
-            text-align: center;
-            padding: 15px;
-            margin-top: auto;
-        }
     </style>
 </head>
-
 <body>
 
     <header>
         <div class="logo">
-            <img src="/images/stc-logo.png" alt="Save The Children">
+            <img src="/images/stc-logo.png" alt="Logo">
         </div>
+        
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search...">
+            <button onclick="search()" class="btn-search"><i class='fa fa-search'></i></button>
+            <button onclick="clearSearch()" class="btn-clear"><i class='fa fa-times'></i></button>
+        </div>
+
         <nav>
-            <a href="/"><i class='fa fa-home'></i>Home</a>
+            <a href="/"><i class='fa fa-home'></i> Home</a>
             <a href="/events"><i class='fa fa-file-text'></i> Events</a>
         </nav>
     </header>
 
-    <h1>Search Results</h1>
+    <h1>Search: <span id="keyword"></span></h1>
     <div id="results"></div>
 
-    <footer>
-        <p>&copy; 2025 Save The Children. All Rights Reserved.</p>
-    </footer>
-
     <script>
+        function search() {
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) {
+                alert("Enter keyword");
+                return;
+            }
+            window.location.href = `/search?keyword=${keyword}`;
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('keyword').textContent = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        document.getElementById('searchInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') search();
+        });
+
         document.addEventListener("DOMContentLoaded", function () {
-            const params = new URLSearchParams(window.location.search);
-            const keyword = params.get("keyword");
-            const resultsContainer = document.getElementById("results");
+            const keyword = new URLSearchParams(window.location.search).get("keyword");
+            const results = document.getElementById("results");
 
             if (!keyword) {
-                resultsContainer.innerHTML = "<p>Please enter a keyword to search for events.</p>";
+                document.getElementById('keyword').textContent = 'None';
+                results.innerHTML = '<p style="text-align:center">Enter keyword to search</p>';
                 return;
             }
 
-            fetch(`/api/events?keyword=${encodeURIComponent(keyword)}`)
-                .then(response => response.json())
+            document.getElementById('keyword').textContent = keyword;
+            document.getElementById('searchInput').value = keyword;
+
+            fetch(`http://localhost:3060/api/events/search/${keyword}`)
+                .then(res => res.json())
                 .then(events => {
                     if (events.length === 0) {
-                        resultsContainer.innerHTML = `<p>No events found for: <strong>${keyword}</strong></p>`;
+                        results.innerHTML = '<p style="text-align:center">No events found</p>';
                         return;
                     }
-                    resultsContainer.innerHTML = events.map(event => `
-                <div class="event">
-    <img src="${event.image}" alt="${event.name} Image">
-    <h3>${event.name}</h3>
-    <p><strong>ID:</strong> ${event.id}</p>
-    <p><strong>Location:</strong> ${event.location}</p>
-    <p><strong>Date:</strong> ${event.date}</p>
-</div>
-
-                </div>
-            `).join("");
+                    
+                    results.innerHTML = '';
+                    events.forEach(event => {
+                        const div = document.createElement('div');
+                        div.className = 'event';
+                        div.innerHTML = `
+                            <img src="http://localhost:3060${event.image}" alt="${event.name}" onclick="location.href='/event-detail?id=${event.id}'">
+                            <h3 onclick="location.href='/event-detail?id=${event.id}'">${event.name}</h3>
+                            <p><strong>Location:</strong> ${event.location || 'TBA'}</p>
+                            <p><strong>Date:</strong> ${event.date || 'TBA'}</p>
+                        `;
+                        results.appendChild(div);
+                    });
                 })
-                .catch(err => {
-                    console.error(err);
-                    resultsContainer.innerHTML = "<p>Error loading events.</p>";
+                .catch(() => {
+                    results.innerHTML = '<p>Error loading events</p>';
                 });
         });
     </script>
 
 </body>
-
 </html>
