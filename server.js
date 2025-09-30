@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const path = require("path");
 
 const eventAPI = require("./API/controllerAPI/api-controller");
+const registerAPI = require("./API/controllerAPI/register-api-controller");
 
 const app = express();
 
@@ -33,9 +34,12 @@ app.get("/search", (req, res) => {
     res.sendFile(path.join(__dirname, "client", "search.html"));
 });
 
+
 // API routes
 app.use("/api/events", eventAPI);
+app.use("/api/register", registerAPI);
+
 
 app.listen(3060, () => {
-    console.log("✅ Server running at http://localhost:3060");
+    console.log(" Server running at http://localhost:3060");
 });

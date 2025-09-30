@@ -5,8 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register Event | Save the Children</title>
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,7 +14,7 @@
             padding: 0;
         }
 
-        
+
         header {
             background-color: white;
             padding: 20px;
@@ -59,9 +58,8 @@
             color: #000;
         }
 
-        /* ✅ Hero-style heading */
         .hero {
-            background: linear-gradient(135deg, #f1faee, #a8dadc);
+            background: linear-gradient(135deg, #f1faee, #a92e2e63);
             padding: 30px;
             text-align: center;
             border-radius: 8px;
@@ -75,15 +73,33 @@
             margin: 0;
         }
 
-        /* ✅ Form */
         form {
             max-width: 600px;
             margin: 20px auto;
             background: white;
             padding: 20px;
             border-radius: 8px;
-            border: 2px solid #000;
+            border: 3px solid red;
+            /* changed outline to red */
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        button {
+            background: rgb(30, 3, 3);
+            /* red button */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        button:hover {
+            background: darkred;
+            /* darker red on hover */
         }
 
         form h2 {
@@ -103,24 +119,8 @@
             padding: 10px;
             margin-top: 5px;
             border-radius: 5px;
-            border: 2px solid #000;
+            border: 2px solid #b42424;
             box-sizing: border-box;
-        }
-
-        button {
-            background: #1d3557;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            margin-top: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-        }
-
-        button:hover {
-            background: #457b9d;
         }
     </style>
 </head>
@@ -128,83 +128,128 @@
 <body>
 
 
-   <header>
-    <div class="logo">
-        <a href="/">
-            <img src="/images/stc-logo.png" alt="Save The Children">
-        </a>
-    </div>
-    <nav>
-      ]
-
-
+    <header>
+        <div class="logo">
+            <a href="/">
+                <img src="/images/stc-logo.png" alt="Save The Children">
+            </a>
+        </div>
         <nav>
-            <a href="/">Home</a>
-            <a href="/events">My Events</a>
-        </nav>
+
+
+            <nav>
+                <a href="/"><i class='fa fa-home'></i>Home</a>
+                <a href="/events"><i class='fa fa-file-text'></i> Events</a>
+            </nav>
     </header>
 
     <!-- Hero Section -->
     <div class="hero">
         <h1>Register a New Event</h1>
     </div>
-
-    <!--  Register Form -->
     <form id="registerForm">
         <h2>Event Registration</h2>
 
-        <label for="name">Event Name</label>
+        <label for="eventSelect">Choose Event</label>
+        <select id="eventSelect" name="event_id" required></select>
+
+        <label for="eventDateSelect">Choose Event Date</label>
+        <select id="eventDateSelect" name="event_date" required></select>
+
+        <label for="eventTicket_price">Ticket Price ($)</label>
+        <input type="number" id="eventTicket_price" name="event_ticket_price" step="0.01" readonly>
+
+
+        <div id="eventDetails"></div>
+
+        <label for="name">Your Name</label>
         <input type="text" id="name" name="name" required>
 
-        <label for="location">Location</label>
-        <input type="text" id="location" name="location" required>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
 
-        <label for="date">Date</label>
-        <input type="date" id="date" name="date" required>
+        <label for="donation">Donation Amount ($)</label>
+        <input type="number" id="donation" name="donation" step="0.01">
 
-        <label for="time">Time</label>
-        <input type="time" id="time" name="time" required>
 
-        <label for="ticket_price">Ticket Price ($)</label>
-        <input type="number" id="ticket_price" name="ticket_price" step="0.01" required>
-
-        <label for="goal_amount">Goal Amount ($)</label>
-        <input type="number" id="goal_amount" name="goal_amount" step="0.01" required>
-
-        <label for="progress_amount">Progress Amount ($)</label>
-        <input type="number" id="progress_amount" name="progress_amount" step="0.01" required>
-
-        <button type="submit">Register Event</button>
+        <button type="submit">Register</button>
     </form>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const eventSelect = document.getElementById("eventSelect");
+    const eventDateSelect = document.getElementById("eventDateSelect");
+    const ticketPriceInput = document.getElementById("eventTicket_price");
 
-    <script>
-        function redirectToResults() {
-            const eventId = document.getElementById("txtID").value.trim();
-            if (eventId) {
-                window.location.href = `/events/${eventId}`;
-            } else {
-                alert("Please enter an Event ID to search.");
+    // Fetch events from backend
+    fetch("http://localhost:3060/api/events")
+        .then(res => res.json())
+        .then(events => {
+            const eventsMap = {};
+
+            events.forEach(event => {
+                const option = document.createElement("option");
+                option.value = event.id;
+                option.text = event.name;
+                option.dataset.date = event.date;
+                option.dataset.time = event.time;
+                option.dataset.location = event.location;
+                option.dataset.ticket_price = event.ticket_price;
+
+                eventSelect.appendChild(option);
+                eventsMap[event.id] = event;
+            });
+
+            if (events.length > 0) {
+                updateEventDetails(events[0]);
             }
-        }
 
-        document.getElementById("registerForm").addEventListener("submit", function (e) {
-            e.preventDefault();
+            eventSelect.addEventListener("change", function () {
+                const selectedEvent = eventsMap[this.value];
+                updateEventDetails(selectedEvent);
+            });
 
-            const formData = {
-                name: document.getElementById("name").value,
-                location: document.getElementById("location").value,
-                date: document.getElementById("date").value,
-                time: document.getElementById("time").value,
-                ticket_price: document.getElementById("ticket_price").value,
-                goal_amount: document.getElementById("goal_amount").value,
-                progress_amount: document.getElementById("progress_amount").value
-            };
+            function updateEventDetails(event) {
+                eventDateSelect.innerHTML = "";
+                const dateOption = document.createElement("option");
+                dateOption.value = event.date;
+                dateOption.text = event.date + " (" + event.time + ")";
+                eventDateSelect.appendChild(dateOption);
 
-            console.log("Event Data:", formData);
-            alert("Event registered successfully!");
-            e.target.reset();
+                ticketPriceInput.value = parseFloat(event.ticket_price).toFixed(2);
+            }
+        })
+        .catch(err => console.error("Error fetching events:", err));
+
+    // Handle form submission
+    document.getElementById("registerForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const data = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            event_id: eventSelect.value,
+            event_date: eventDateSelect.value,
+            ticket_price: ticketPriceInput.value,
+            donation: document.getElementById("donation").value
+        };
+
+        fetch("http://localhost:3060/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(response => {
+            alert(response.message);
+            document.getElementById("registerForm").reset();
+        })
+        .catch(err => {
+            console.error("Error:", err);
+            alert("Error registering event");
         });
-    </script>
+    });
+});
+</script>
 
 </body>
 
