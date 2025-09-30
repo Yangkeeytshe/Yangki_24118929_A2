@@ -3,6 +3,78 @@ const path = require("path");
 const express = require('express');
 const router = express.Router();
 
+var connection = dbcon.getconnection();
+connection.connect();
+
+// GET all events
+
+router.get("/", (req, res) => {
+    connection.query("SELECT * FROM event", (err, records, fields) => {
+        if (err) {
+            console.error("Error while retrieving data:", err);
+            return res.status(500).json({ error: "Database error" });
+        }
+        
+        const eventsWithProgress = records.map(event => ({
+            ...event,
+            progress_percentage: event.goal_amount > 0 
+                ? (event.progress_amount / event.goal_amount) * 100 
+                : 0
+        }));
+        
+        res.json(eventsWithProgress);
+    });
+});
+// Sanitize input to prevent XSS
+const sanitizeInput = (input) => {
+    if (typeof input !== 'string') return input;
+    return input.replace(/[<>]/g, '');
+};
+
+router.get("/search/:keyword", (req, res) => {
+    const keyword = sanitizeInput(req.params.keyword);
+
+    if (!keyword || keyword.length > 100) {
+        return res.status(400).json({ error: "Invalid or too long keyword" });
+    }
+
+    const sql = `
+        SELECT * FROM event
+        WHERE id = ?                        
+           OR name LIKE ?                   
+           OR DATE_FORMAT(date, '%Y-%m-%d') = ?  
+    `;
+
+    const searchTerm = `%${keyword}%`;
+
+    // Try to parse ID
+    const idValue = parseInt(keyword);
+    const isId = !isNaN(idValue);
+
+    connection.query(
+        sql,
+        [
+            isId ? idValue : -1, 
+            searchTerm,           
+            keyword               
+        ],
+        (err, records) => {
+            if (err) {
+                console.error("Error while searching events:", err);
+                return res.status(500).json({ error: "Database error" });
+            }
+
+            if (records.length === 0) {
+                return res.status(404).json({ error: "No matching events found" });
+            }
+
+            res.json(records); 
+        }
+    );
+});
+
+
+
 // Input validation helper
 const validateEvent = (eventData) => {
     const errors = [];
@@ -27,71 +99,7 @@ const validateEvent = (eventData) => {
     return errors;
 };
 
-// Sanitize input to prevent XSS
-const sanitizeInput = (input) => {
-    if (typeof input !== 'string') return input;
-    return input.replace(/[<>]/g, '');
-};
 
-var connection = dbcon.getconnection();
-connection.connect();
-
-// GET all events
-router.get("/", (req, res) => {
-    connection.query("SELECT * FROM event", (err, records, fields) => {
-        if (err) {
-            console.error("Error while retrieving data:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-        
-        const eventsWithProgress = records.map(event => ({
-            ...event,
-            progress_percentage: event.goal_amount > 0 
-                ? (event.progress_amount / event.goal_amount) * 100 
-                : 0
-        }));
-        
-        res.json(eventsWithProgress);
-    });
-});
-
-// Search by keyword - Enhanced security
-router.get("/search/:keyword", (req, res) => {
-    const keyword = sanitizeInput(req.params.keyword);
-    
-    // Limit keyword length to prevent abuse
-    if (keyword.length > 100) {
-        return res.status(400).json({ error: "Search keyword too long" });
-    }
-
-    const sql = `
-        SELECT * FROM event
-        WHERE id = ? 
-           OR name LIKE ? 
-           OR status LIKE ? 
-           OR location LIKE ? 
-           OR description LIKE ? 
-           OR date = ?
-    `;
-    
-    const searchTerm = `%${keyword}%`;
-
-    connection.query(sql, [keyword, searchTerm, searchTerm, searchTerm, searchTerm, keyword], (err, records) => {
-        if (err) {
-            console.error("Error while searching events:", err);
-            return res.status(500).json({ error: "Database error" });
-        }
-        
-        const eventsWithProgress = records.map(event => ({
-            ...event,
-            progress_percentage: event.goal_amount > 0 
-                ? (event.progress_amount / event.goal_amount) * 100 
-                : 0
-        }));
-        
-        res.json(eventsWithProgress);
-    });
-});
 
 // GET event by ID
 router.get("/:id", (req, res) => {
