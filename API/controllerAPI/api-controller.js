@@ -31,7 +31,7 @@ router.get("/:id", (req, res) => {
 });
 
 
-// ======================= GET event by id or keyword or date =======================
+// search keyword
 router.get("/:keyword", (req, res) => {
     const keyword = req.params.keyword;
 
@@ -57,7 +57,7 @@ router.get("/:keyword", (req, res) => {
 });
 
 
-// GET event details by ID
+/* GET event details by ID
 router.get("/details/:id", (req, res) => {
     const id = req.params.id;
     const sql = "SELECT * FROM event WHERE id = ?";
@@ -72,10 +72,10 @@ router.get("/details/:id", (req, res) => {
         }
         res.json(results[0]);
     });
-});
+});*/
 
 
-// ======================= UPDATE event =======================
+// update detials
 router.put("/", (req, res) => {
     const { id, name, category, location, date, time, description, image, ticket_price, goal_amount } = req.body;
 
@@ -89,6 +89,7 @@ router.put("/", (req, res) => {
         }
     });
 });
+//
 router.post("/", (req, res) => {
     const { name, category, location, date, time, description, image, ticket_price, goal_amount } = req.body;
 
@@ -102,10 +103,7 @@ router.post("/", (req, res) => {
         }
     });
 });
-
-
-
-// ======================= DELETE event =======================
+//delete item
 router.delete("/:id", (req, res) => {
     connection.query("DELETE FROM event WHERE id=?", [req.params.id], (err, result) => {
         if (err) {

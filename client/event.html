@@ -157,7 +157,7 @@
         <select id="eventDateSelect" name="event_date" required></select>
 
         <label for="eventTicket_price">Ticket Price ($)</label>
-        <input type="number" id="eventTicket_price" name="event_ticket_price" step="0.01" readonly>
+        <input type="number" id="eventTicketPrice" name="event_ticket_price" step="0.01" readonly>
 
 
         <div id="eventDetails"></div>
@@ -176,14 +176,13 @@
     </form>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    const eventSelect = document.getElementById("eventSelect");
-    const eventDateSelect = document.getElementById("eventDateSelect");
-    const ticketPriceInput = document.getElementById("eventTicket_price");
-
-    // Fetch events from backend
     fetch("http://localhost:3060/api/events")
         .then(res => res.json())
         .then(events => {
+            const eventSelect = document.getElementById("eventSelect");
+            const eventDateSelect = document.getElementById("eventDateSelect");
+            const ticketPriceInput = document.getElementById("eventTicketPrice");
+
             const eventsMap = {};
 
             events.forEach(event => {
@@ -194,14 +193,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 option.dataset.time = event.time;
                 option.dataset.location = event.location;
                 option.dataset.ticket_price = event.ticket_price;
+                
 
                 eventSelect.appendChild(option);
                 eventsMap[event.id] = event;
             });
 
-            if (events.length > 0) {
-                updateEventDetails(events[0]);
-            }
+            updateEventDetails(events[0]);
 
             eventSelect.addEventListener("change", function () {
                 const selectedEvent = eventsMap[this.value];
@@ -214,22 +212,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 dateOption.value = event.date;
                 dateOption.text = event.date + " (" + event.time + ")";
                 eventDateSelect.appendChild(dateOption);
+                
 
                 ticketPriceInput.value = parseFloat(event.ticket_price).toFixed(2);
             }
-        })
-        .catch(err => console.error("Error fetching events:", err));
+        });
 
-    // Handle form submission
+    // Form submit
     document.getElementById("registerForm").addEventListener("submit", function (e) {
         e.preventDefault();
 
         const data = {
             name: document.getElementById("name").value,
             email: document.getElementById("email").value,
-            event_id: eventSelect.value,
-            event_date: eventDateSelect.value,
-            ticket_price: ticketPriceInput.value,
+            event_id: document.getElementById("eventSelect").value,
+            event_date: document.getElementById("eventDateSelect").value,
+            ticket_price: document.getElementById("eventTicketPrice").value,
+            
             donation: document.getElementById("donation").value
         };
 

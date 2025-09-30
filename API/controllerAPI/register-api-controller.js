@@ -32,11 +32,11 @@ router.post("/", (req, res) => {
     }
 
     const query = `
-        INSERT INTO registration (name, email, event_id, event_date, event_ticket_price, donation)
+        INSERT INTO registration (name, email, event_id, event_date, ticket_price, donation)
         VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    connection.query(query, [name, email, event_id, event_date, event_ticket_price, donation || 0], (err, result) => {
+    connection.query(query, [name, email, event_id, event_date, ticket_price, donation || 0], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: "Database error" });
