@@ -10,14 +10,6 @@ module.exports = {
             database: dbDetails.database
         });
 
-        connection.connect(err => {
-            if (err) {
-                console.error(" Database connection failed:", err.message);
-            } else {
-                console.log(" Database connected successfully!");
-            }
-        });
-
         return connection;
     }
 }

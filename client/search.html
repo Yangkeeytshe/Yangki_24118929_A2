@@ -1,179 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search | Save The Children</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background-color: #f8f8f8;
-        }
-
-        header {
-            background-color: white;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 3px solid #000;
-        }
-
-        .logo img {
-            height: 40px;
-        }
-
-        nav a {
-            margin-left: 20px;
-            text-decoration: none;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .search-bar {
-            display: flex;
-            gap: 8px;
-        }
-
-        .search-bar input {
-            padding: 10px;
-            border: 2px solid #000;
-            border-radius: 5px;
-            width: 200px;
-        }
-
-        .search-bar button {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-search { background: #e63946; }
-        .btn-clear { background: #999; }
-
-        h1 {
-            text-align: center;
-            color: #e63946;
-            margin: 20px;
-        }
-
-        #results {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .event {
-            background: white;
-            padding: 20px;
-            width: 300px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-
-        .event img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        .event h3 {
-            color: #e63946;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <title>Search Events - Save the Children</title>
 </head>
 <body>
-
     <header>
         <div class="logo">
-            <img src="/images/stc-logo.png" alt="Logo">
-        </div>
-        
-        <div class="search-bar">
-            <input type="text" id="searchInput" placeholder="Search...">
-            <button onclick="search()" class="btn-search"><i class='fa fa-search'></i></button>
-            <button onclick="clearSearch()" class="btn-clear"><i class='fa fa-times'></i></button>
+            <img src="/images/stc-logo.png" alt="Save The Children">
         </div>
 
         <nav>
             <a href="/"><i class='fa fa-home'></i> Home</a>
             <a href="/events"><i class='fa fa-file-text'></i> Events</a>
+            <a href="/search"><i class='fa fa-search'></i> Search</a>
+            <a href="/admin"><i class='fa fa-user-shield'></i> Admin</a>
         </nav>
     </header>
 
-    <h1>Search: <span id="keyword"></span></h1>
-    <div id="results"></div>
+  <main class="main-content">
+    <section class="search-section">
+      <h1>Search Charity Events</h1>
+      <p class="search-description">Find the perfect charity event by filtering by date, location, category, or status.</p>
+      
+      <form id="searchForm" class="search-form">
+        <div class="form-group">
+          <label for="eventDate">Date:</label>
+          <input type="date" id="eventDate" name="date">
+        </div>
+        
+        <div class="form-group">
+          <label for="eventLocation">Location:</label>
+          <input type="text" id="eventLocation" name="location" placeholder="Enter city or venue">
+        </div>
+        
+        <div class="form-group">
+          <label for="eventCategory">Category:</label>
+          <select id="eventCategory" name="category">
+            <option value="">All Categories</option>
+          </select>
+        </div>
 
-    <script>
-        function search() {
-            const keyword = document.getElementById('searchInput').value.trim();
-            if (!keyword) {
-                alert("Enter keyword");
-                return;
-            }
-            window.location.href = `/search?keyword=${keyword}`;
+        <div class="form-group">
+          <label for="eventStatus">Status:</label>
+          <select id="eventStatus" name="status">
+            <option value="">All Statuses</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="active">Active</option>
+            <option value="past">Past</option>
+          </select>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search Events</button>
+          <button type="button" id="clearFilters" class="btn btn-secondary"><i class="fa fa-times"></i> Clear Filters</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="results-section">
+      <div id="loading" class="loading" style="display: none;">
+        <i class="fa fa-spinner fa-spin"></i> Searching events...
+      </div>
+      <div id="searchResults"></div>
+      <div id="errorMessage" class="error-message" style="display: none;"></div>
+      <div id="noResults" class="no-results" style="display: none;">
+        <i class="fa fa-search"></i>
+        <p>No events found matching your criteria. Try adjusting your search filters.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2025 Save the Children. Making a difference, one event at a time.</p>
+  </footer>
+
+  <script>
+    // Load categories and check for URL parameters
+    document.addEventListener("DOMContentLoaded", () => {
+        loadCategories();
+        
+        // Check for keyword from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const keyword = urlParams.get('keyword');
+        if (keyword) {
+            document.getElementById("eventLocation").value = keyword;
+            performSearch();
         }
+    });
 
-        function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('keyword').textContent = '';
-            document.getElementById('results').innerHTML = '';
-        }
-
-        document.getElementById('searchInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') search();
-        });
-
-        document.addEventListener("DOMContentLoaded", function () {
-            const keyword = new URLSearchParams(window.location.search).get("keyword");
-            const results = document.getElementById("results");
-
-            if (!keyword) {
-                document.getElementById('keyword').textContent = 'None';
-                results.innerHTML = '<p style="text-align:center">Enter keyword to search</p>';
-                return;
-            }
-
-            document.getElementById('keyword').textContent = keyword;
-            document.getElementById('searchInput').value = keyword;
-
-            fetch(`http://localhost:3060/api/events/search/${keyword}`)
-                .then(res => res.json())
-                .then(events => {
-                    if (events.length === 0) {
-                        results.innerHTML = '<p style="text-align:center">No events found</p>';
-                        return;
-                    }
-                    
-                    results.innerHTML = '';
-                    events.forEach(event => {
-                        const div = document.createElement('div');
-                        div.className = 'event';
-                        div.innerHTML = `
-                            <img src="http://localhost:3060${event.image}" alt="${event.name}" onclick="location.href='/event-detail?id=${event.id}'">
-                            <h3 onclick="location.href='/event-detail?id=${event.id}'">${event.name}</h3>
-                            <p><strong>Location:</strong> ${event.location || 'TBA'}</p>
-                            <p><strong>Date:</strong> ${event.date || 'TBA'}</p>
-                        `;
-                        results.appendChild(div);
-                    });
-                })
-                .catch(() => {
-                    results.innerHTML = '<p>Error loading events</p>';
+    // Load categories from events
+    function loadCategories() {
+        fetch("http://localhost:3060/api/events")
+            .then(res => res.json())
+            .then(events => {
+                const categories = [...new Set(events.map(e => e.category).filter(c => c))];
+                const categorySelect = document.getElementById("eventCategory");
+                categorySelect.innerHTML = '<option value="">All Categories</option>';
+                
+                categories.forEach(cat => {
+                    const option = document.createElement("option");
+                    option.value = cat;
+                    option.textContent = cat;
+                    categorySelect.appendChild(option);
                 });
-        });
-    </script>
+            })
+            .catch(err => {
+                console.error("Failed to load categories:", err);
+            });
+    }
 
+    // Handle form submission
+    document.getElementById("searchForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        performSearch();
+    });
+
+    // Clear filters
+    document.getElementById("clearFilters").addEventListener("click", function() {
+        document.getElementById("eventDate").value = "";
+        document.getElementById("eventLocation").value = "";
+        document.getElementById("eventCategory").value = "";
+        document.getElementById("eventStatus").value = "";
+        
+        document.getElementById("searchResults").innerHTML = "";
+        document.getElementById("errorMessage").style.display = "none";
+        document.getElementById("noResults").style.display = "none";
+    });
+
+    // Perform search
+    function performSearch() {
+        const date = document.getElementById("eventDate").value;
+        const location = document.getElementById("eventLocation").value.trim();
+        const category = document.getElementById("eventCategory").value;
+        const status = document.getElementById("eventStatus").value;
+
+        const loadingElement = document.getElementById("loading");
+        const searchResultsElement = document.getElementById("searchResults");
+        const errorElement = document.getElementById("errorMessage");
+        const noResultsElement = document.getElementById("noResults");
+
+        // Show loading
+        loadingElement.style.display = "block";
+        errorElement.style.display = "none";
+        noResultsElement.style.display = "none";
+        searchResultsElement.innerHTML = "";
+
+        fetch("http://localhost:3060/api/events")
+            .then(res => res.json())
+            .then(events => {
+                // Client-side filtering
+                let filteredEvents = events;
+
+                if (date) {
+                    filteredEvents = filteredEvents.filter(event => event.date === date);
+                }
+                if (location) {
+                    filteredEvents = filteredEvents.filter(event => 
+                        event.location.toLowerCase().includes(location.toLowerCase())
+                    );
+                }
+                if (category) {
+                    filteredEvents = filteredEvents.filter(event => event.category === category);
+                }
+                if (status) {
+                    filteredEvents = filteredEvents.filter(event => event.status === status);
+                }
+
+                loadingElement.style.display = "none";
+
+                if (filteredEvents.length === 0) {
+                    noResultsElement.style.display = "block";
+                    return;
+                }
+
+                displaySearchResults(filteredEvents);
+            })
+            .catch(err => {
+                console.error("Error searching events:", err);
+                loadingElement.style.display = "none";
+                errorElement.innerHTML = '<i class="fa fa-exclamation-circle"></i><p>Failed to search events. Please try again later.</p>';
+                errorElement.style.display = "block";
+            });
+    }
+
+    // Display search results using DOM manipulation
+    function displaySearchResults(events) {
+        const searchResultsElement = document.getElementById("searchResults");
+        searchResultsElement.innerHTML = "";
+
+        events.forEach(event => {
+            const eventDate = new Date(event.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+            });
+
+            const eventCard = document.createElement("div");
+            eventCard.classList.add("event-card");
+            eventCard.onclick = () => viewEventDetails(event.id);
+
+            eventCard.innerHTML = `
+                <img src="http://localhost:3060${event.image}" alt="${event.name}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px; margin-bottom: 15px;">
+                <h3>${event.name}</h3>
+                <div class="event-meta">
+                    <span class="event-date"><i class="fa fa-calendar"></i> ${eventDate}</span>
+                    <span class="event-location"><i class="fa fa-map-marker"></i> ${event.location}</span>
+                    ${event.category ? `<span class="event-category">${event.category}</span>` : ''}
+                </div>
+                <div class="event-description">
+                    ${event.description ? event.description.substring(0, 120) + (event.description.length > 120 ? '...' : '') : 'Join us for this meaningful charity event.'}
+                </div>
+                <a href="#" class="event-link" onclick="event.preventDefault(); viewEventDetails(${event.id})">
+                    View Details →
+                </a>
+            `;
+
+            searchResultsElement.appendChild(eventCard);
+        });
+    }
+
+    // Navigate to event details
+    function viewEventDetails(eventId) {
+        window.location.href = `/event-detail?id=${eventId}`;
+    }
+  </script>
 </body>
 </html>
